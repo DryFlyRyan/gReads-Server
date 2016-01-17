@@ -10,4 +10,4 @@ converter.on("end_parsed", function (jsonArray) {
 });
 
 //read from file
-require("fs").createReadStream("./gReads_import.csv").pipe(converter);
+require("fs").createReadStream("./csv_imports/gReads_import.csv").pipe(converter);
