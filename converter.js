@@ -100,6 +100,11 @@ function searchThenAddAuthor(first_name, last_name, biography, photo_url, book_i
           .then(function(id){
             resolve(id);
           })
+        } else {
+          crud.Author_Book.AuthorBookJoin(parseInt(book_id), parseInt(author.id))
+          .then(function(id){
+            resolve(id);
+          })
         }
       })
     }
