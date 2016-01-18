@@ -14,18 +14,18 @@ exports.up = function(knex, Promise) {
       table.increments().primary().unsigned();
       table.string('first_name');
       table.string('last_name');
-      table.string('biography');
-      table.string('photo_url');
-      table.string('reference_id');
+      table.text('biography');
+      table.text('photo_url');
+      table.text('reference_id');
   }).then(function(){
     return knex.schema.createTable('book',
     function(table){
-      table.increments().primary().unsigned();
-      table.string('title');
-      table.string('genre');
-      table.string('description');
-      table.string('photo_url');
-    })
+        table.increments().primary().unsigned();
+        table.string('title');
+        table.string('genre');
+        table.text('description');
+        table.string('photo_url');
+      })
     })
   })
 };

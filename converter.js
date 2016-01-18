@@ -1,5 +1,6 @@
 var fs = require('fs')
 var crud = require('./crud')
+var forEach = require('async-foreach').forEach;
 
 //Converter Class
 var Converter = require("csvtojson").Converter;
@@ -7,6 +8,7 @@ var converter = new Converter({});
 
 //end_parsed will be emitted once parsing finished
 converter.on("end_parsed", function (jsonArray) {
+  // console.log(jsonArray);
    saveArray(jsonArray);
 });
 
@@ -14,46 +16,54 @@ converter.on("end_parsed", function (jsonArray) {
 require("fs").createReadStream("./csv_imports/gReads_import.csv").pipe(converter);
 
 function saveArray(array) {
-  for (var i = 0; i < array.length; i++) {
-    var book = array[i];
+  forEach(array, function(book) {
+    var done = this.async();
     searchThenAddBook(book)
     .then(function(id) {
       var bookID = id;
-      Promise.all([
+      if (book['Author 1 First Name']) {
         searchThenAddAuthor(
           book['Author 1 First Name'],
           book['Author 1 Last Name'],
           book['Author 1 Biography'],
           book['Author 1 Portrait URL'],
           bookID
-        ),
-        searchThenAddAuthor(
-          book['Author 2 First Name'],
-          book['Author 2 Last Name'],
-          book['Author 2 Biography'],
-          book['Author 2 Portrait URL'],
-          bookID
-        ),
-        searchThenAddAuthor(
-          book['Author 3 First Name'],
-          book['Author 3 Last Name'],
-          book['Author 3 Biography'],
-          book['Author 3 Portrait URL'],
-          bookID
-        ).then(function(){
-          resolve('Book Added')
+        )
+        .then(function(){
+          if (book['Author 2 First Name']) {
+            searchThenAddAuthor(
+              book['Author 2 First Name'],
+              book['Author 2 Last Name'],
+              book['Author 2 Biography'],
+              book['Author 2 Portrait URL'],
+              bookID
+            )
+            .then(function(){
+              if(book['Author 3 First Name']) {
+                searchThenAddAuthor(
+                  book['Author 3 First Name'],
+                  book['Author 3 Last Name'],
+                  book['Author 3 Biography'],
+                  book['Author 3 Portrait URL'],
+                  bookID
+                )
+              }
+            })
+          }
         })
-      ])
+      }
     })
-  }
+    .then(function(){
+      done();
+    })
+  })
 }
 
 function searchThenAddBook(book){
   return new Promise(function(resolve, reject) {
     crud.Book.searchBook(book['Book Title'])
-    .then(function(book) {
-      console.log(book);
-      if(book.length < 1) {
+    .then(function(foundBook) {
+      if(!foundBook) {
         crud.Book.createBook(
           book['Book Title'],
           book['Book Genre'],
@@ -63,7 +73,7 @@ function searchThenAddBook(book){
           resolve(id);
         })
       } else {
-        throw new Error('Book already exists')
+        reject("Book entry already exists")
       }
     })
   })
@@ -71,11 +81,13 @@ function searchThenAddBook(book){
 
 function searchThenAddAuthor(first_name, last_name, biography, photo_url, book_id){
   return new Promise(function(resolve, reject) {
-    if(first_name.length > 1) {
-      crud.Author.searchAuthor(first_name, last_name, biography)
+    if(first_name.length > 0) {
+      console.log(first_name);
+      console.log(last_name);
+      crud.Author.searchAuthor(first_name, last_name)
       .then(function(author) {
         console.log(author);
-        if(author) {
+        if(!author) {
           crud.Author.createAuthor(
             first_name,
             last_name,
@@ -83,17 +95,14 @@ function searchThenAddAuthor(first_name, last_name, biography, photo_url, book_i
             photo_url
           )
           .then(function(id){
-            crud.Author_Book.AuthorBookJoin(book_id, id)
+            crud.Author_Book.AuthorBookJoin(parseInt(book_id), parseInt(id))
           })
           .then(function(id){
             resolve(id);
           })
-        } else {
-          throw new Error('Author already exists')
         }
       })
-    } else {
-      reject('No Data Listed');
     }
+    resolve();
   })
 }

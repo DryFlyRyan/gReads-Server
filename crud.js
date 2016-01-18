@@ -64,7 +64,7 @@ function createAuthor(first_name, last_name, biography, photo_url) {
     last_name   : last_name,
     biography   : biography,
     photo_url   : photo_url
-  }).returning('id').then(function(id){
+  }, 'id').returning('id').then(function(id){
     return id;
   })
 }
@@ -83,12 +83,12 @@ function readAuthor(id) {
   })
 }
 
-function searchAuthor(first_name, last_name, biography) {
-  return Author().select().where({
+function searchAuthor(first_name, last_name) {
+  return Author().where({
     first_name  : first_name,
-    last_name   : last_name,
-    biography   : biography
+    last_name   : last_name
   }).first().then(function(author) {
+    console.log(author);
     return author;
   })
 }
@@ -124,6 +124,7 @@ function searchBook(title) {
   return Book().select().where({
     title       : title
   }).first().then(function(book) {
+    console.log(book);
     return book;
   })
 }
@@ -138,7 +139,7 @@ function createAuthorBookJoin(book_id, author_id) {
   return Author_Book().insert({
     book_id     : book_id,
     author_id   : author_id
-  }).returning('id').then(function(id){
+  }, 'id').returning('id').then(function(id){
     return id;
   })
 }
