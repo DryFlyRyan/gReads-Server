@@ -144,6 +144,12 @@ function createAuthorBookJoin(book_id, author_id) {
   })
 }
 
+// function readAuthorBookJoin(author_id) {
+//   return Author_Book().where({
+//     author_id   : author_id
+//   }).returning('book_id').then(function())
+// }
+
 module.exports  = {
   //User Functions
   User            : {
