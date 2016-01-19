@@ -6,7 +6,11 @@ var crud = require('../crud')
 router.get('/books', function(req, res, next) {
   crud.Book.readBooks()
   .then(function(books) {
-    res.json(books);
+    if (books) {
+      res.json(books);
+    } else {
+      res.send('Data not found')
+    }
   });
 });
 
