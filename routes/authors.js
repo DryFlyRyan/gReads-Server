@@ -26,4 +26,11 @@ router.post('/readAuthor', function(req,res,next){
   })
 })
 
+router.post('/new', function(req, res, next){
+  crud.Author.createAuthor(req.body.first_name, req.body.last_name, req.body.photo_url, req.body.biography)
+  .then(function(){
+    res.status(200).send('Author created')
+  })
+})
+
 module.exports = router;
